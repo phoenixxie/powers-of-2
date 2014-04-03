@@ -9,47 +9,52 @@ import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
 
 public class MiniGame implements ApplicationListener {
 	private OrthographicCamera camera;
 	private SpriteBatch batch;
-	private Texture texture;
+	private Texture bucketImage;
 	private Sprite sprite;
-	
+	private Rectangle bucket;
+
 	@Override
-	public void create() {		
-		float w = Gdx.graphics.getWidth();
-		float h = Gdx.graphics.getHeight();
-		
-		camera = new OrthographicCamera(1, h/w);
+	public void create() {
+		camera = new OrthographicCamera(512, 512);
+		camera.position.set(512 / 2, 512 / 2, 0);
+
 		batch = new SpriteBatch();
 		
-		texture = new Texture(Gdx.files.internal("data/libgdx.png"));
-		texture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+		bucketImage = new Texture(Gdx.files.internal("data/libgdx.png"));
 		
-		TextureRegion region = new TextureRegion(texture, 0, 0, 512, 275);
-		
-		sprite = new Sprite(region);
-		sprite.setSize(0.9f, 0.9f * sprite.getHeight() / sprite.getWidth());
-		sprite.setOrigin(sprite.getWidth()/2, sprite.getHeight()/2);
-		sprite.setPosition(-sprite.getWidth()/2, -sprite.getHeight()/2);
+		bucket = new Rectangle();
+		bucket.x = 0;
+		bucket.y = 0;
+		bucket.width = 512;
+		bucket.height = 512;
 	}
 
 	@Override
 	public void dispose() {
+		bucketImage.dispose();
 		batch.dispose();
-		texture.dispose();
 	}
 
 	@Override
 	public void render() {		
-		Gdx.gl.glClearColor(1, 1, 1, 1);
+		Gdx.gl.glClearColor(0, 0, 0.2f, 1);
 		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
+		
+		camera.update();
 		
 		batch.setProjectionMatrix(camera.combined);
 		batch.begin();
-		sprite.draw(batch);
+		batch.draw(bucketImage, bucket.x, bucket.y);
 		batch.end();
+		
+		if (Gdx.input.isTouched()) {
+
+		}
 	}
 
 	@Override
