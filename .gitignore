@@ -1,6 +1,2 @@
 *.class
-.classpath
-.project
 bin/**
-local.properties
-.settings/

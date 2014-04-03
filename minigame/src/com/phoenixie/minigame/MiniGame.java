@@ -50,11 +50,6 @@ public class MiniGame implements ApplicationListener {
 		batch.begin();
 		sprite.draw(batch);
 		batch.end();
-		
-		if (Gdx.input.isTouched()) {
-			Gdx.input.vibrate(10);
-			System.out.println("(x, y) = (" + Gdx.input.getX() + ", " + Gdx.input.getY() + ")");
-		}
 	}
 
 	@Override
