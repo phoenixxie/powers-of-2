@@ -8,8 +8,8 @@ public class Main {
 		LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
 		cfg.title = "minigame";
 		cfg.useGL20 = false;
-		cfg.width = 512;
-		cfg.height = 512;
+		cfg.width = 768;
+		cfg.height = 768;
 		
 		new LwjglApplication(new MiniGame(), cfg);
 	}
