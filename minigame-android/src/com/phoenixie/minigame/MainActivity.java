@@ -14,7 +14,7 @@ public class MainActivity extends AndroidApplication {
         cfg.useGL20 = false;
         cfg.useAccelerometer = false;
         cfg.useCompass = false;
-        cfg.useWakelock = true;
+        cfg.useWakelock = false;
         
         initialize(new MiniGame(), cfg);
     }
