@@ -15,6 +15,7 @@ public class MainActivity extends AndroidApplication {
         cfg.useAccelerometer = false;
         cfg.useCompass = false;
         cfg.useWakelock = false;
+        cfg.hideStatusBar = false;
         
         initialize(new MiniGame(), cfg);
     }
