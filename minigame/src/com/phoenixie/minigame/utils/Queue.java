@@ -8,7 +8,7 @@ public class Queue {
 	private int front = 0;
 	private int rear = 0;
 	
-	private Object[] queue;
+	private int[][][] queue;
 	
 	public Queue() {
 		this(DEFAULT_CAPACITY);
@@ -16,7 +16,7 @@ public class Queue {
 	
 	public Queue(int capacity) {
 		this.capacity = capacity;
-		queue = new Object[capacity];
+		queue = new int[capacity][][];
 	}
 	
 	public int size() {
@@ -24,6 +24,10 @@ public class Queue {
 			return rear - front;
 		}
 		return capacity - front + rear;
+	}
+	
+	public int capacity() {
+		return capacity;
 	}
 	
 	public boolean isEmpty() {
@@ -38,34 +42,34 @@ public class Queue {
 		return false;
 	}
 	
-	public void enqueue(Object obj) {
+	public void enqueue(int[][] item) {
 		if (isFull()) {
 			dequeue();
 		}
 		
-		queue[rear] = obj;
+		queue[rear] = item;
 		++rear;
 		if (rear >= capacity) {
 			rear -= capacity;
 		}
 	}
 	
-	public Object dequeue() {
+	public int[][] dequeue() {
 		if (isEmpty()) {
 			return null;
 		}
 		
-		Object obj = queue[front];
+		int[][] item = queue[front];
 		queue[front] = null;
 		++front;
 		if (front >= capacity) {
 			front -= capacity;
 		}
 		
-		return obj;
+		return item;
 	}
 	
-	public Object pop() {
+	public int[][] pop() {
 		if (isEmpty()) {
 			return null;
 		}
@@ -83,5 +87,26 @@ public class Queue {
 		for (int i = 0; i < capacity; ++i) {
 			queue[i] = null;
 		}
+	}
+	
+	public int dump(int[][][] buf) {
+		int p = front;
+		int i = 0;
+		
+		while (p != rear) {
+			buf[i] = queue[p];
+			++i;
+			
+			++p;
+			if (p >= capacity) {
+				p -= capacity;
+			}
+		}
+		
+		for (int j = i; j < buf.length; ++j) {
+			buf[j] = null;
+		}
+		
+		return i;
 	}
 }
