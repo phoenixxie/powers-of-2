@@ -73,10 +73,14 @@ public class MiniGame extends Game implements GestureListener {
 	private SpriteBatch batch;
 	private Skin skin;
 	private BitmapFont font;
+	
 	private Texture chiffreImage;
 	private TextureRegion[] chiffres;
 	private Texture photoImage;
 	private TextureRegion[] photos;
+	private Texture pictureImage;
+	private TextureRegion[] pictures;
+	
 	private TextureRegion[] currImages;
 	private ShapeRenderer renderer;
 	private Rectangle viewport;
@@ -91,13 +95,14 @@ public class MiniGame extends Game implements GestureListener {
 
 	private CheckBox checkChiffres;
 	private CheckBox checkPhotos;
+	private CheckBox checkPictures;
 	private CheckBox checkTable44;
 	private CheckBox checkTable55;
 	private CheckBox checkTable66;
 	private Dialog dialogSettings;
 
-	private int boiteHorzCount = 5;
-	private int boiteVertCount = 5;
+	private int boiteHorzCount = 4;
+	private int boiteVertCount = 4;
 	private int tableWidth = 0;
 	private int tableHeight = 0;
 	private int boiteWidth = IMG_WIDTH;
@@ -107,7 +112,7 @@ public class MiniGame extends Game implements GestureListener {
 	}
 
 	enum BoiteType {
-		CHIFFRES, PHOTOS
+		CHIFFRES, PHOTOS, PICTURES
 	}
 
 	private static class Pos {
@@ -126,9 +131,9 @@ public class MiniGame extends Game implements GestureListener {
 	}
 
 	private static class Settings {
-		public BoiteType boiteType = BoiteType.PHOTOS;
-		public int boiteHorzCount = 5;
-		public int boiteVertCount = 5;
+		public BoiteType boiteType = BoiteType.PICTURES;
+		public int boiteHorzCount = 4;
+		public int boiteVertCount = 4;
 	};
 
 	private Pos tableVertex;
@@ -191,6 +196,14 @@ public class MiniGame extends Game implements GestureListener {
 					IMG_WIDTH, IMG_WIDTH);
 		}
 		
+		pictureImage = new Texture(Gdx.files.internal("data/pics.png"));
+		pictures = new TextureRegion[CHIFFRE_MAX];
+
+		for (int i = 0; i < CHIFFRE_MAX; ++i) {
+			pictures[i] = new TextureRegion(pictureImage, i * IMG_WIDTH, 0,
+					IMG_WIDTH, IMG_WIDTH);
+		}
+		
 		tableVertex = new Pos();
 		tableVertex.x = (SCREEN_WIDTH - TABLE_WIDTH) / 2;
 		tableVertex.y = BOTTOM_SPACE;
@@ -247,6 +260,8 @@ public class MiniGame extends Game implements GestureListener {
 			currImages = chiffres;
 		} else if (settings.boiteType == BoiteType.PHOTOS) {
 			currImages = photos;
+		} else if (settings.boiteType == BoiteType.PICTURES) {
+			currImages = pictures;
 		}
 		
 		changeTableSize(settings.boiteHorzCount);
@@ -257,11 +272,12 @@ public class MiniGame extends Game implements GestureListener {
 
 		createDialogSettings();
 
-		if (!gameLoaded) {
+		if (gameLoaded) {
 			buttonResume.setVisible(false);
+			resumeGame();
+		} else {
+			resetGame();
 		}
-
-		resetGame();
 
 		Timer.schedule(new Task() {
 
@@ -600,9 +616,10 @@ public class MiniGame extends Game implements GestureListener {
 	private void createDialogSettings() {
 		checkChiffres = new CheckBox("Chiffres", skin);
 		checkPhotos = new CheckBox("Photos", skin);
+		checkPictures = new CheckBox("Images", skin);
 
 		ButtonGroup buttonTable = new ButtonGroup(checkChiffres,
-				checkPhotos);
+				checkPhotos, checkPictures);
 		buttonTable.setMaxCheckCount(1);
 		buttonTable.setMinCheckCount(1);
 		buttonTable.setUncheckLast(true);
@@ -634,6 +651,12 @@ public class MiniGame extends Game implements GestureListener {
 						currImages = photos;
 						Gdx.graphics.requestRendering();
 					}
+				} else if (checkPictures.isChecked()) {
+					if (settings.boiteType != BoiteType.PICTURES) {
+						settings.boiteType = BoiteType.PICTURES;
+						currImages = pictures;
+						Gdx.graphics.requestRendering();
+					}	
 				}
 				
 				int tableSize = settings.boiteHorzCount;
@@ -647,6 +670,7 @@ public class MiniGame extends Game implements GestureListener {
 				
 				if (tableSize != settings.boiteHorzCount) {
 					settings.boiteHorzCount = settings.boiteVertCount = tableSize;
+					buttonReset.setVisible(true);
 				}
 				
 				saveSettings();
@@ -654,12 +678,13 @@ public class MiniGame extends Game implements GestureListener {
 		};
 		
 		dialogSettings.padTop(50).padBottom(50);
-		dialogSettings.getContentTable().add(checkChiffres).width(225).colspan(3);
-		dialogSettings.getContentTable().add(checkPhotos).width(225).colspan(3);
+		dialogSettings.getContentTable().add(checkChiffres).width(250);
+		dialogSettings.getContentTable().add(checkPhotos).width(250);
+		dialogSettings.getContentTable().add(checkPictures).width(250);
 		dialogSettings.getContentTable().row();
-		dialogSettings.getContentTable().add(checkTable44).width(150).colspan(2).padTop(20);
-		dialogSettings.getContentTable().add(checkTable55).width(150).colspan(2).padTop(20);
-		dialogSettings.getContentTable().add(checkTable66).width(150).colspan(2).padTop(20);
+		dialogSettings.getContentTable().add(checkTable44).width(250).padTop(20);
+		dialogSettings.getContentTable().add(checkTable55).width(250).padTop(20);
+		dialogSettings.getContentTable().add(checkTable66).width(250).padTop(20);
 		dialogSettings.getContentTable().row();
 		
 		dialogSettings.getButtonTable().padTop(30);
@@ -721,7 +746,7 @@ public class MiniGame extends Game implements GestureListener {
 				}
 				batch.draw(currImages[cur], boitesPos[i][j].x,
 						boitesPos[i][j].y, boiteWidth, boiteWidth);
-				if (currImages == photos) {
+				if (currImages == photos || currImages == pictures) {
 					font.draw(batch, "" + (cur + 1), boitesPos[i][j].x + 10,
 							boitesPos[i][j].y + FONT_SIZE);
 				}
