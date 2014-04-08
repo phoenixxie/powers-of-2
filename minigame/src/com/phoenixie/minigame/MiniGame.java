@@ -30,12 +30,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.ui.Window;
-import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Timer;
@@ -608,7 +604,7 @@ public class MiniGame extends Game implements GestureListener {
 		ButtonGroup buttonTable = new ButtonGroup(checkChiffres,
 				checkPhotos);
 		buttonTable.setMaxCheckCount(1);
-		buttonTable.setMinCheckCount(0);
+		buttonTable.setMinCheckCount(1);
 		buttonTable.setUncheckLast(true);
 		
 		checkTable44 = new CheckBox("4 X 4", skin);
@@ -617,7 +613,7 @@ public class MiniGame extends Game implements GestureListener {
 		
 		ButtonGroup tableSize = new ButtonGroup(checkTable44, checkTable55, checkTable66);
 		tableSize.setMaxCheckCount(1);
-		tableSize.setMinCheckCount(0);
+		tableSize.setMinCheckCount(1);
 		tableSize.setUncheckLast(true);
 
 		dialogSettings = new Dialog("Param¨¨tre", skin) {
