@@ -424,6 +424,7 @@ public class MiniGame extends Game implements GestureListener {
 		}
 
 		gameCount = 0;
+		gameScore = 0;
 		gameTime = 0;
 		gameStartTime = System.currentTimeMillis();
 
@@ -616,7 +617,7 @@ public class MiniGame extends Game implements GestureListener {
 		tableSize.setMinCheckCount(1);
 		tableSize.setUncheckLast(true);
 
-		dialogSettings = new Dialog("Param¨¨tre", skin) {
+		dialogSettings = new Dialog("Param¨¨tre", skin, "dialog") {
 			protected void result(Object object) {
 				if (!(Boolean) object) {
 					return;
