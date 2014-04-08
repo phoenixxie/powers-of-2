@@ -131,7 +131,7 @@ public class MiniGame extends Game implements GestureListener {
 	}
 
 	private static class Settings {
-		public BoiteType boiteType = BoiteType.PICTURES;
+		public BoiteType boiteType = BoiteType.CHIFFRES;
 		public int boiteHorzCount = 4;
 		public int boiteVertCount = 4;
 	};
