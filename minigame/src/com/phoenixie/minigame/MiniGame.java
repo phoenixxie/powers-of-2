@@ -350,7 +350,7 @@ public class MiniGame extends Game implements GestureListener {
 			settings = kryo.readObject(input, Settings.class);
 			input.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			return;
 		}
 	}
@@ -397,7 +397,7 @@ public class MiniGame extends Game implements GestureListener {
 
 			gameLoaded = true;
 		} catch (Exception e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			return false;
 		}
 
@@ -634,7 +634,7 @@ public class MiniGame extends Game implements GestureListener {
 		tableSize.setMinCheckCount(1);
 		tableSize.setUncheckLast(true);
 
-		dialogSettings = new Dialog("Param¨¨tre", skin, "dialog") {
+		dialogSettings = new Dialog("Param¨¨tres", skin, "dialog") {
 			protected void result(Object object) {
 				if (!(Boolean) object) {
 					return;
