@@ -303,8 +303,7 @@ public class MiniGame extends Game implements GestureListener {
 
 		tableWidth = TABLE_WIDTH;
 		boiteWidth = (tableWidth - 2 * CADRE_WIDTH - (boiteHorzCount - 1)
-				* LINE_WIDTH)
-				/ boiteHorzCount;
+				* LINE_WIDTH) / boiteHorzCount;
 		tableHeight = boiteVertCount * boiteWidth + (boiteVertCount - 1)
 				* LINE_WIDTH + 2 * CADRE_WIDTH;
 
@@ -452,6 +451,7 @@ public class MiniGame extends Game implements GestureListener {
 		generateChiffre();
 
 		shufflePhotos();
+		shufflePictures();
 
 		Gdx.graphics.requestRendering();
 	}
@@ -702,8 +702,10 @@ public class MiniGame extends Game implements GestureListener {
 	private void showSettings() {
 		if (settings.boiteType == BoiteType.CHIFFRES) {
 			checkChiffres.setChecked(true);
-		} else {
+		} else if (settings.boiteType == BoiteType.PHOTOS) {
 			checkPhotos.setChecked(true);
+		} else {
+			checkPictures.setChecked(true);
 		}
 		
 		switch (settings.boiteHorzCount) {
@@ -814,6 +816,17 @@ public class MiniGame extends Game implements GestureListener {
 
 	}
 
+	private void shufflePictures() {
+
+		for (int i = 0; i < pictures.length; i++) {
+			int randomPosition = random.nextInt(pictures.length);
+			TextureRegion temp = pictures[i];
+			pictures[i] = pictures[randomPosition];
+			pictures[randomPosition] = temp;
+		}
+
+	}
+	
 	private void calVideBoites() {
 		videBoitesCount = 0;
 		for (int i = 0; i < boiteHorzCount; ++i) {
