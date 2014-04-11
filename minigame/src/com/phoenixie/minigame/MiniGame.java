@@ -31,6 +31,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -165,6 +166,7 @@ public class MiniGame extends Game implements GestureListener {
 		Texture.setEnforcePotImages(false);
 
 		stage = new Stage();
+		stage.setViewport(SCREEN_WIDTH, SCREEN_HEIGHT, true);
 
 		etapeQueue = new Queue();
 		gameEtapeBuffer = new int[etapeQueue.capacity()][][];
@@ -209,7 +211,7 @@ public class MiniGame extends Game implements GestureListener {
 		tableVertex.y = BOTTOM_SPACE;
 		tableRightTop = new Pos();
 		
-		Gdx.input.setInputProcessor(new InputMultiplexer(stage,
+		Gdx.input.setInputProcessor(new InputMultiplexer(stage, 
 				new GestureDetector(0.0f, 0.0f, 0.0f, 5f, this) {
 					private boolean wrongStart = false;
 
@@ -618,6 +620,10 @@ public class MiniGame extends Game implements GestureListener {
 		checkChiffres = new CheckBox("Chiffres", skin);
 		checkPhotos = new CheckBox("Photos", skin);
 		checkPictures = new CheckBox("Images", skin);
+		
+		checkChiffres.getCells().get(0).size(30, 30);
+		checkPhotos.getCells().get(0).size(30, 30);
+		checkPictures.getCells().get(0).size(30, 30);
 
 		ButtonGroup buttonTable = new ButtonGroup(checkChiffres,
 				checkPhotos, checkPictures);
@@ -629,11 +635,16 @@ public class MiniGame extends Game implements GestureListener {
 		checkTable55 = new CheckBox("5 X 5", skin);
 		checkTable66 = new CheckBox("6 X 6", skin);
 		
+		checkTable44.getCells().get(0).size(30, 30);
+		checkTable55.getCells().get(0).size(30, 30);
+		checkTable66.getCells().get(0).size(30, 30);
+		
 		ButtonGroup tableSize = new ButtonGroup(checkTable44, checkTable55, checkTable66);
 		tableSize.setMaxCheckCount(1);
 		tableSize.setMinCheckCount(1);
 		tableSize.setUncheckLast(true);
 
+		Dialog.fadeDuration = 0.2f;
 		dialogSettings = new Dialog("Param¨¨tres", skin, "dialog") {
 			protected void result(Object object) {
 				if (!(Boolean) object) {
@@ -677,22 +688,29 @@ public class MiniGame extends Game implements GestureListener {
 				saveSettings();
 			}
 		};
-		
+
+		dialogSettings.center();
 		dialogSettings.padTop(50).padBottom(50);
-		dialogSettings.getContentTable().add(checkChiffres).width(250);
-		dialogSettings.getContentTable().add(checkPhotos).width(250);
-		dialogSettings.getContentTable().add(checkPictures).width(250);
-		dialogSettings.getContentTable().row();
-		dialogSettings.getContentTable().add(checkTable44).width(250).padTop(20);
-		dialogSettings.getContentTable().add(checkTable55).width(250).padTop(20);
-		dialogSettings.getContentTable().add(checkTable66).width(250).padTop(20);
-		dialogSettings.getContentTable().row();
-		
-		dialogSettings.getButtonTable().padTop(30);
+
+		Table table = dialogSettings.getContentTable();
+		table.defaults().width(250);
+		table.add(checkChiffres);
+		table.add(checkPhotos);
+		table.add(checkPictures);
+		table.row().padTop(20);
+		table.add(checkTable44);
+		table.add(checkTable55);
+		table.add(checkTable66);
+		table.row();
+
+		table = dialogSettings.getButtonTable();
+		table.padTop(30);
 		TextButton dbutton = new TextButton("OK", skin);
-		dialogSettings.button(dbutton, true);
+		table.add(dbutton).width(200f);
+		dialogSettings.setObject(dbutton, true);
 		dbutton = new TextButton("Annuler", skin);
-		dialogSettings.button(dbutton, false);
+		table.add(dbutton).width(200f);
+		dialogSettings.setObject(dbutton, false);
 
 		dialogSettings.invalidateHierarchy();
 		dialogSettings.invalidate();
@@ -794,6 +812,7 @@ public class MiniGame extends Game implements GestureListener {
 		float w = (float) SCREEN_WIDTH * scale;
 		float h = (float) SCREEN_HEIGHT * scale;
 		viewport = new Rectangle(crop.x, crop.y, w, h);
+		
 	}
 
 	@Override
