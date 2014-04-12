@@ -60,7 +60,7 @@ Régle
 
 Comme [2048] (http://fr.wikipedia.org/wiki/2048_(jeu_vid%C3%A9o))
 
-Ce n'est pas très difficile pour obtenir 2048, et c'est plus intéressant et plus difficile après. J'ai obtenu au maximum 16384.
+Ce n'est pas très difficile pour obtenir 2048, et c'est plus intéressant et plus difficile après. J'ai obtenu au maximum 16384 sur la grille de 4×4 cases, et le maximum est 65536, 2 puissance 16.
 
 Fonctions
 ----------------------
