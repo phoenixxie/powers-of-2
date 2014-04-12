@@ -3,7 +3,6 @@ Puissance de 2
 
 Condition préalable
 ---------------------
- 0. C'est plus facile de installer directement le jeu à votre cellphone.
 
  1. Trouvez le «Paramètres» dans votre cellphone.
 
@@ -28,6 +27,8 @@ Condition préalable
 
 Installation
 ---------------------
+ 0. C'est plus facile de installer directement le jeu à votre cellphone.
+
  1. Connectez-vous à votre compte Facebook et trouvez le statut que j'ai écrit.
 
  ![1.png](https://github.com/phoenixxie/minigame/raw/master/instruction/1.png)
