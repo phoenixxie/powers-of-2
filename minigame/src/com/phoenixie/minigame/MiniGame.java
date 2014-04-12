@@ -93,7 +93,6 @@ public class MiniGame extends Game implements GestureListener {
 
 	private ImageButton buttonReset;
 	private ImageButton buttonUndo;
-	private ImageButton buttonResume;
 	private ImageButton buttonSettings;
 	private Stage stage;
 
@@ -285,7 +284,6 @@ public class MiniGame extends Game implements GestureListener {
 		createDialogs();
 
 		if (gameLoaded) {
-			buttonResume.setVisible(false);
 			resumeGame();
 		} else {
 			resetGame();
@@ -555,16 +553,6 @@ public class MiniGame extends Game implements GestureListener {
 		style.imageDown = new TextureRegionDrawable(buttonDown);
 		buttonReset = new ImageButton(style);
 
-		buttonUp = new TextureRegion(buttonImage, BUTTON_RESUME * BUTTON_WIDTH,
-				0, BUTTON_WIDTH, BUTTON_HEIGHT);
-		buttonDown = new TextureRegion(buttonImage, BUTTON_RESUME
-				* BUTTON_WIDTH, BUTTON_HEIGHT, BUTTON_WIDTH, BUTTON_HEIGHT);
-
-		style = new ImageButtonStyle();
-		style.imageUp = new TextureRegionDrawable(buttonUp);
-		style.imageDown = new TextureRegionDrawable(buttonDown);
-		buttonResume = new ImageButton(style);
-
 		buttonUp = new TextureRegion(buttonImage, BUTTON_SETTINGS
 				* BUTTON_WIDTH, 0, BUTTON_WIDTH, BUTTON_HEIGHT);
 		buttonDown = new TextureRegion(buttonImage, BUTTON_SETTINGS
@@ -579,14 +567,11 @@ public class MiniGame extends Game implements GestureListener {
 		buttonUndo.setY(BOTTOM_SPACE + tableHeight + 40);
 		buttonReset.setX(20);
 		buttonReset.setY(BOTTOM_SPACE + tableHeight + 40);
-		buttonResume.setX(20 + BUTTON_WIDTH + 20);
-		buttonResume.setY(BOTTOM_SPACE + tableHeight + 40);
 		buttonSettings.setX(SCREEN_WIDTH - 20 - BUTTON_WIDTH);
 		buttonSettings.setY(SCREEN_HEIGHT - 30 - BUTTON_HEIGHT);
 
 		stage.addActor(buttonUndo);
 		stage.addActor(buttonReset);
-		stage.addActor(buttonResume);
 		stage.addActor(buttonSettings);
 
 		buttonReset.addListener(new ChangeListener() {
@@ -611,16 +596,6 @@ public class MiniGame extends Game implements GestureListener {
 					}
 				}
 			}
-		});
-
-		buttonResume.addListener(new ChangeListener() {
-
-			@Override
-			public void changed(ChangeEvent event, Actor actor) {
-				resumeGame();
-				buttonResume.setVisible(false);
-			}
-
 		});
 
 		buttonSettings.addListener(new ChangeListener() {
@@ -941,7 +916,6 @@ public class MiniGame extends Game implements GestureListener {
 			etapeQueue.enqueue(bak);
 			buttonUndo.setVisible(true);
 			buttonReset.setVisible(true);
-			buttonResume.setVisible(false);
 			saveGame();
 		}
 	}
