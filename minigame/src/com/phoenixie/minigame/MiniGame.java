@@ -54,6 +54,8 @@ public class MiniGame extends Game implements GestureListener {
 	static final int SCREEN_HEIGHT = 1280;
 	static final float ASPECT_RATIO = (float) SCREEN_WIDTH
 			/ (float) SCREEN_HEIGHT;
+	
+	static final int PHOTO_COUNT = 19;
 
 	static final int BUTTON_UNDO = 0;
 	static final int BUTTON_RESET = 1;
@@ -81,6 +83,7 @@ public class MiniGame extends Game implements GestureListener {
 	private TextureRegion[] photos;
 	private Texture pictureImage;
 	private TextureRegion[] pictures;
+	private int maxChiffre;
 	
 	private TextureRegion[] currImages;
 	private ShapeRenderer renderer;
@@ -101,6 +104,13 @@ public class MiniGame extends Game implements GestureListener {
 	private CheckBox checkTable55;
 	private CheckBox checkTable66;
 	private Dialog dialogSettings;
+	private Dialog dialogReset;
+	private Dialog dialog2048;
+	private Dialog dialog4096;
+	private Dialog dialog8192;
+	private Dialog dialog16384;
+	private Dialog dialog32768;
+	private Dialog dialog65536;
 
 	private int boiteHorzCount = 4;
 	private int boiteVertCount = 4;
@@ -191,9 +201,9 @@ public class MiniGame extends Game implements GestureListener {
 		}
 
 		photoImage = new Texture(Gdx.files.internal("data/photos.png"));
-		photos = new TextureRegion[CHIFFRE_MAX];
+		photos = new TextureRegion[PHOTO_COUNT];
 
-		for (int i = 0; i < CHIFFRE_MAX; ++i) {
+		for (int i = 0; i < PHOTO_COUNT; ++i) {
 			photos[i] = new TextureRegion(photoImage, i * IMG_WIDTH, 0,
 					IMG_WIDTH, IMG_WIDTH);
 		}
@@ -272,7 +282,7 @@ public class MiniGame extends Game implements GestureListener {
 
 		drawButtons();
 
-		createDialogSettings();
+		createDialogs();
 
 		if (gameLoaded) {
 			buttonResume.setVisible(false);
@@ -416,6 +426,15 @@ public class MiniGame extends Game implements GestureListener {
 		gameScore = gameState.gameScore;
 		gameTime = gameState.gameTime;
 		chiffreTable = gameState.chiffreTable;
+		
+		for (int i = 0; i < boiteHorzCount; ++i) {
+			for (int j = 0; j < boiteVertCount; ++j) {
+				int cur = chiffreTable[i][j];
+				if (maxChiffre < cur) {
+					maxChiffre = cur;
+				}
+			}
+		}
 
 		for (int i = 0; i < gameState.gameEtapes.length; ++i) {
 			if (gameState.gameEtapes[i] == null) {
@@ -440,6 +459,7 @@ public class MiniGame extends Game implements GestureListener {
 			}
 		}
 
+		maxChiffre = 0;
 		gameCount = 0;
 		gameScore = 0;
 		gameTime = 0;
@@ -573,10 +593,7 @@ public class MiniGame extends Game implements GestureListener {
 
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
-				if (boiteHorzCount != settings.boiteHorzCount) {
-					changeTableSize(settings.boiteHorzCount);
-				}
-				resetGame();
+				dialogReset.show(stage);
 			}
 
 		});
@@ -616,7 +633,7 @@ public class MiniGame extends Game implements GestureListener {
 		});
 	}
 
-	private void createDialogSettings() {
+	private void createDialogs() {
 		checkChiffres = new CheckBox("Chiffres", skin);
 		checkPhotos = new CheckBox("Photos", skin);
 		checkPictures = new CheckBox("Images", skin);
@@ -645,7 +662,7 @@ public class MiniGame extends Game implements GestureListener {
 		tableSize.setUncheckLast(true);
 
 		Dialog.fadeDuration = 0.2f;
-		dialogSettings = new Dialog("Param��tres", skin, "dialog") {
+		dialogSettings = new Dialog("Paramètres", skin, "dialog") {
 			protected void result(Object object) {
 				if (!(Boolean) object) {
 					return;
@@ -690,7 +707,7 @@ public class MiniGame extends Game implements GestureListener {
 		};
 
 		dialogSettings.center();
-		dialogSettings.padTop(50).padBottom(50);
+		dialogSettings.padTop(100).padBottom(30);
 
 		Table table = dialogSettings.getContentTable();
 		table.defaults().width(250);
@@ -715,6 +732,33 @@ public class MiniGame extends Game implements GestureListener {
 		dialogSettings.invalidateHierarchy();
 		dialogSettings.invalidate();
 		dialogSettings.layout();
+		
+		dialogReset = new Dialog("", skin, "dialog") {
+			protected void result (Object object) {
+				Boolean v = (Boolean)object;
+				
+				if (v) {
+					if (boiteHorzCount != settings.boiteHorzCount) {
+						changeTableSize(settings.boiteHorzCount);
+					}
+					resetGame();
+				}
+			}
+		}.text("Êtes-vous sûr de relancer le jeu?").button("Oui!", true).button("Non!", false).key(Keys.ENTER, true)
+			.key(Keys.ESCAPE, false);
+		
+		dialog2048 = new Dialog("2048!", skin, "dialog").text("Très bien! Continuez!").button("OK", true);
+		
+		dialog4096 = new Dialog("4096!!", skin, "dialog").text("Excellent! Continuez!").button("OK", true);
+		
+		dialog8192 = new Dialog("8192!!", skin, "dialog").text("Intelligent! Continuez!").button("OK", true);
+		
+		dialog16384 = new Dialog("16384!!", skin, "dialog").text("Génial!! Continuez!").button("OK", true);
+		
+		dialog32768 = new Dialog("32768!!", skin, "dialog").text("Incroyable! Continuez!").button("OK", true);
+		
+		dialog65536 = new Dialog("65536!!", skin, "dialog")
+			.text("Félicitation!\nVous avez obtenu le maximal point!!!").button("OK", true);
 	}
 
 	private void showSettings() {
@@ -765,6 +809,7 @@ public class MiniGame extends Game implements GestureListener {
 				if (cur == -1) {
 					continue;
 				}
+				
 				batch.draw(currImages[cur], boitesPos[i][j].x,
 						boitesPos[i][j].y, boiteWidth, boiteWidth);
 				if (currImages == photos || currImages == pictures) {
@@ -832,7 +877,7 @@ public class MiniGame extends Game implements GestureListener {
 			photos[i] = photos[randomPosition];
 			photos[randomPosition] = temp;
 		}
-
+		
 	}
 
 	private void shufflePictures() {
@@ -900,6 +945,21 @@ public class MiniGame extends Game implements GestureListener {
 			saveGame();
 		}
 	}
+	
+	private void felicitation(int cur) {
+		
+		if (cur > maxChiffre) {
+			switch (cur) {
+			case 10: dialog2048.show(stage); break;
+			case 11: dialog4096.show(stage); break;
+			case 12: dialog8192.show(stage); break;
+			case 13: dialog16384.show(stage); break;
+			case 14: dialog32768.show(stage); break;
+			case 15: dialog65536.show(stage); break;
+			}
+			maxChiffre = cur;
+		}
+	}
 
 	private int moveRight() {
 		boolean moved = false;
@@ -936,13 +996,15 @@ public class MiniGame extends Game implements GestureListener {
 					continue;
 				}
 
-				if (chiffreTable[newi + 1][j] == cur) {
+				if (chiffreTable[newi + 1][j] == cur && chiffreTable[newi + 1][j] < CHIFFRE_MAX) {
 					++chiffreTable[newi + 1][j];
+					felicitation(chiffreTable[newi + 1][j]);
 					chiffreTable[newi][j] = -1;
 					++gap;
 					moved = true;
 					merged = true;
 					score += (1 << (chiffreTable[newi + 1][j] + 1));
+					felicitation(chiffreTable[newi + 1][j]);
 				}
 
 			}
@@ -987,13 +1049,14 @@ public class MiniGame extends Game implements GestureListener {
 					continue;
 				}
 
-				if (chiffreTable[newi - 1][j] == cur) {
+				if (chiffreTable[newi - 1][j] == cur && chiffreTable[newi - 1][j] < CHIFFRE_MAX) {
 					++chiffreTable[newi - 1][j];
 					chiffreTable[newi][j] = -1;
 					++gap;
 					moved = true;
 					merged = true;
 					score += (1 << (chiffreTable[newi - 1][j] + 1));
+					felicitation(chiffreTable[newi - 1][j]);
 				}
 			}
 		}
@@ -1038,13 +1101,14 @@ public class MiniGame extends Game implements GestureListener {
 					continue;
 				}
 
-				if (chiffreTable[i][newj + 1] == cur) {
+				if (chiffreTable[i][newj + 1] == cur && chiffreTable[i][newj + 1] < CHIFFRE_MAX) {
 					++chiffreTable[i][newj + 1];
 					chiffreTable[i][newj] = -1;
 					++gap;
 					moved = true;
 					merged = true;
 					score += (1 << (chiffreTable[i][newj + 1] + 1));
+					felicitation(chiffreTable[i][newj + 1]);
 				}
 			}
 		}
@@ -1090,13 +1154,14 @@ public class MiniGame extends Game implements GestureListener {
 					continue;
 				}
 
-				if (chiffreTable[i][newj - 1] == cur) {
+				if (chiffreTable[i][newj - 1] == cur && chiffreTable[i][newj - 1] < CHIFFRE_MAX) {
 					++chiffreTable[i][newj - 1];
 					chiffreTable[i][newj] = -1;
 					++gap;
 					moved = true;
 					merged = true;
 					score += (1 << (chiffreTable[i][newj - 1] + 1));
+					felicitation(chiffreTable[i][newj - 1]);
 				}
 			}
 		}
