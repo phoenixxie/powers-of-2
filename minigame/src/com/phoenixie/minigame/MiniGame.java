@@ -7,6 +7,8 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
@@ -93,7 +95,15 @@ public class MiniGame extends Game implements GestureListener {
 	private Dialog dialog16384;
 	private Dialog dialog32768;
 	private Dialog dialog65536;
-
+	
+	private Sound soundStart;
+	private Sound soundSwipe;
+	private Sound soundError;
+	private Sound soundScore;
+	private Sound soundLevelup;
+	private Sound soundFelicitation;
+	private Music musicBackground;
+	
 	enum Direction {
 		HOLD, UP, DOWN, LEFT, RIGHT
 	}
@@ -109,6 +119,7 @@ public class MiniGame extends Game implements GestureListener {
 
 	private static class GameState_0D125 {
 		public int boiteHorzCount;
+		@SuppressWarnings("unused")
 		public int boiteVertCount;
 		public int gameCount;
 		public long gameScore;
@@ -120,6 +131,7 @@ public class MiniGame extends Game implements GestureListener {
 	private static class Settings_0D125 {
 		public BoiteType boiteType = BoiteType.CHIFFRES;
 		public int boiteHorzCount = 4;
+		@SuppressWarnings("unused")
 		public int boiteVertCount = 4;
 	};
 
@@ -250,6 +262,14 @@ public class MiniGame extends Game implements GestureListener {
 		grille = new Grille();
 		grille.create(this, tableVertex, font, imageStore);
 		grille.setTableSize(settings.tableSize);
+		
+		soundStart = Gdx.audio.newSound(Gdx.files.internal("data/sound/start.wav"));
+		soundSwipe = Gdx.audio.newSound(Gdx.files.internal("data/sound/swipe.wav"));
+		soundError = Gdx.audio.newSound(Gdx.files.internal("data/sound/error.wav"));
+		soundScore = Gdx.audio.newSound(Gdx.files.internal("data/sound/score.wav"));
+		soundLevelup = Gdx.audio.newSound(Gdx.files.internal("data/sound/levelup.wav"));
+		soundFelicitation = Gdx.audio.newSound(Gdx.files.internal("data/sound/felicitation.mp3"));
+		musicBackground = Gdx.audio.newMusic(Gdx.files.internal("data/sound/bg.ogg"));
 
 		loadGame();
 
@@ -262,6 +282,9 @@ public class MiniGame extends Game implements GestureListener {
 		} else {
 			resetGame();
 		}
+		
+		musicBackground.play();
+		musicBackground.setLooping(true);
 	}
 
 	private void saveSettings() {
@@ -324,7 +347,7 @@ public class MiniGame extends Game implements GestureListener {
 			return;
 		}
 
-		int etapeCount = etapeQueue.dump(gameEtapeBuffer);
+		etapeQueue.dump(gameEtapeBuffer);
 
 		FileHandle file = Gdx.files.local("gamedata.0.126");
 		OutputStream ostream = file.write(false);
@@ -453,6 +476,8 @@ public class MiniGame extends Game implements GestureListener {
 		buttonReset.setVisible(false);
 
 		grille.restart();
+		
+		soundStart.play();
 	}
 
 	private void drawStat() {
@@ -784,6 +809,11 @@ public class MiniGame extends Game implements GestureListener {
 
 	private void felicitation(int cur) {
 		if (cur > maxChiffre) {
+			if (cur < 10) {
+				soundLevelup.play();
+			} else {
+				soundFelicitation.play();
+			}
 			switch (cur) {
 			case 10:
 				dialog2048.show(stage);
@@ -809,12 +839,20 @@ public class MiniGame extends Game implements GestureListener {
 	}
 
 	private void move(Direction direction) {
-		grille.move(direction);
+		if (grille.move(direction)) {
+			soundSwipe.play();
+		} else {
+			soundError.play(0.3f);
+		}
 	}
 
 	void onMoved(int maxChiffre, int score, int[][] oldChiffreTable, int[][] newChiffreTable) {
 		gameScore += score;
 		++gameCount;
+		
+//		if (score > 0) {
+//			soundScore.play();
+//		}
 
 		buttonUndo.setVisible(true);
 		buttonReset.setVisible(true);
@@ -834,19 +872,17 @@ public class MiniGame extends Game implements GestureListener {
 
 	@Override
 	public boolean touchDown(float x, float y, int pointer, int button) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean tap(float x, float y, int count, int button) {
-		// TODO Auto-generated method stub
+		System.out.println("AA: " + x + ", " + y + ", " + count);
 		return false;
 	}
 
 	@Override
 	public boolean longPress(float x, float y) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
@@ -884,14 +920,12 @@ public class MiniGame extends Game implements GestureListener {
 
 	@Override
 	public boolean zoom(float initialDistance, float distance) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean pinch(Vector2 initialPointer1, Vector2 initialPointer2,
 			Vector2 pointer1, Vector2 pointer2) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 }
