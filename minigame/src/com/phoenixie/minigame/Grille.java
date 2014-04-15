@@ -2,15 +2,12 @@ package com.phoenixie.minigame;
 
 import java.util.Random;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.phoenixie.minigame.MiniGame.Pos;
 import com.phoenixie.minigame.MiniGame.Direction;
-
-;
 
 public class Grille {
 	static final int CHIFFRE_MAX = 16;
@@ -21,12 +18,14 @@ public class Grille {
 
 	private static Random random = new Random(System.currentTimeMillis());
 
+	private MiniGame game;
+
 	private BitmapFont font;
 	private ImageStore store;
 
 	private Tuile[] tuileStack;
 	private int tuileStackTop;
-	
+
 	private Tuile[] tuilePoubelle;
 	private int tuilePoubelleCount;
 
@@ -53,7 +52,9 @@ public class Grille {
 
 	}
 
-	public void create(Pos tableVertex, BitmapFont font, ImageStore store) {
+	public void create(MiniGame game, Pos tableVertex, BitmapFont font,
+			ImageStore store) {
+		this.game = game;
 		this.tableVertex = tableVertex;
 		this.font = font;
 		this.store = store;
@@ -83,9 +84,9 @@ public class Grille {
 		boiteWidth = (TABLE_WIDTH - 2 * CADRE_WIDTH - (tableSize - 1)
 				* LINE_WIDTH)
 				/ tableSize;
-		tableWidth = tableSize * boiteWidth + (tableSize - 1)
-		 * LINE_WIDTH + 2 * CADRE_WIDTH;
-		
+		tableWidth = tableSize * boiteWidth + (tableSize - 1) * LINE_WIDTH + 2
+				* CADRE_WIDTH;
+
 		int yPos = tableVertex.y + CADRE_WIDTH;
 		for (int j = 0; j < tableSize; ++j) {
 			int xPos = tableVertex.x + CADRE_WIDTH;
@@ -101,6 +102,13 @@ public class Grille {
 		reset();
 	}
 
+	public void restart() {
+		reset();
+
+		generateChiffre();
+		generateChiffre();
+	}
+
 	public void reset() {
 		for (int j = 0; j < tableSize; ++j) {
 			for (int i = 0; i < tableSize; ++i) {
@@ -113,17 +121,32 @@ public class Grille {
 		tuileStackTop = 0;
 		for (int i = 0; i < tuileStack.length; ++i) {
 			Tuile t = new Tuile();
-			tuileStack[tuileStackTop++] = t;
+			tuileStack[tuileStackTop] = t;
+			tuileStackTop++;
 		}
-		
+
 		maxChiffre = 0;
 
 		isMoving = false;
 		deltaScore = 0;
 		tuilePoubelleCount = 0;
+	}
 
-		generateChiffre();
-		generateChiffre();
+	public void setChiffreTable(int[][] table) {
+		reset();
+
+		chiffreTable[workingTable] = table;
+		for (int j = 0; j < tableSize; ++j) {
+			for (int i = 0; i < tableSize; ++i) {
+				int cur = table[i][j];
+				if (cur != -1) {
+					tuileTable[workingTable][i][j] = getTuile().init(i, j, cur);
+					if (maxChiffre < cur) {
+						maxChiffre = cur;
+					}
+				}
+			}
+		}
 	}
 
 	public void draw(ShapeRenderer renderer, SpriteBatch batch) {
@@ -175,6 +198,9 @@ public class Grille {
 			isMoving = false;
 			workingTable = 1 - workingTable;
 
+			game.onMoved(maxChiffre, deltaScore,
+					chiffreTable[1 - workingTable], chiffreTable[workingTable]);
+
 			clearPoubelle();
 			generateChiffre();
 		}
@@ -189,12 +215,12 @@ public class Grille {
 		tuileStack[tuileStackTop] = t;
 		++tuileStackTop;
 	}
-	
+
 	public void putInPoubelle(Tuile t) {
 		tuilePoubelle[tuilePoubelleCount] = t;
 		++tuilePoubelleCount;
 	}
-	
+
 	public void clearPoubelle() {
 		for (int i = 0; i < tuilePoubelleCount; ++i) {
 			releaseTuile(tuilePoubelle[i]);
@@ -235,11 +261,6 @@ public class Grille {
 	}
 
 	public boolean move(Direction direction) {
-		// int[][] bak = chiffreTable.clone();
-		// for (int i = 0; i < chiffreTable.length; ++i) {
-		// bak[i] = bak[i].clone();
-		// }
-
 		if (isMoving) {
 			return false;
 		}
@@ -253,7 +274,7 @@ public class Grille {
 
 		deltaScore = 0;
 		tuilePoubelleCount = 0;
-		
+
 		boolean moved = false;
 
 		if (direction == Direction.UP) {
@@ -265,16 +286,6 @@ public class Grille {
 		} else if (direction == Direction.RIGHT) {
 			moved = moveRight();
 		}
-
-		// if (score >= 0) {
-		// ++gameCount;
-		// gameScore += score;
-		// generateChiffre();
-		// etapeQueue.enqueue(bak);
-		// buttonUndo.setVisible(true);
-		// buttonReset.setVisible(true);
-		// saveGame();
-		// }
 
 		if (moved) {
 			isMoving = true;
@@ -321,19 +332,23 @@ public class Grille {
 
 					tuileTable[workingTable][i][j].move(Direction.RIGHT,
 							newi + 1, j);
-					
+
 					putInPoubelle(tuileTable[1 - workingTable][i][j]);
 					putInPoubelle(tuileTable[1 - workingTable][newi + 1][j]);
-					
+
 					tuileTable[1 - workingTable][i][j] = null;
 					tuileTable[1 - workingTable][newi + 1][j] = getTuile()
 							.init(newi + 1, j, value);
+
+					if (maxChiffre < value) {
+						maxChiffre = value;
+					}
 				} else {
 					merged = false;
 					if (gap > 0) {
 						tuileTable[workingTable][i][j].move(Direction.RIGHT,
 								newi, j);
-						
+
 						tuileTable[1 - workingTable][newi][j] = tuileTable[1 - workingTable][i][j];
 						tuileTable[1 - workingTable][i][j] = null;
 					}
@@ -378,19 +393,25 @@ public class Grille {
 					moved = true;
 					merged = true;
 					deltaScore += (1 << (chiffreTable[1 - workingTable][newi - 1][j] + 1));
-					tuileTable[workingTable][i][j].move(Direction.LEFT, newi - 1, j);
-					
+					tuileTable[workingTable][i][j].move(Direction.LEFT,
+							newi - 1, j);
+
 					putInPoubelle(tuileTable[1 - workingTable][i][j]);
 					putInPoubelle(tuileTable[1 - workingTable][newi - 1][j]);
-					
+
 					tuileTable[1 - workingTable][newi - 1][j] = getTuile()
 							.init(newi - 1, j, value);
 					tuileTable[1 - workingTable][i][j] = null;
+
+					if (maxChiffre < value) {
+						maxChiffre = value;
+					}
 				} else {
 					merged = false;
 					if (gap > 0) {
-						tuileTable[workingTable][i][j].move(Direction.LEFT, newi, j);
-						
+						tuileTable[workingTable][i][j].move(Direction.LEFT,
+								newi, j);
+
 						tuileTable[1 - workingTable][newi][j] = tuileTable[1 - workingTable][i][j];
 						tuileTable[1 - workingTable][i][j] = null;
 					}
@@ -435,19 +456,25 @@ public class Grille {
 					moved = true;
 					merged = true;
 					deltaScore += (1 << (chiffreTable[1 - workingTable][i][newj + 1] + 1));
-					tuileTable[workingTable][i][j].move(Direction.DOWN, i, newj + 1);
-					
+					tuileTable[workingTable][i][j].move(Direction.DOWN, i,
+							newj + 1);
+
 					putInPoubelle(tuileTable[1 - workingTable][i][j]);
 					putInPoubelle(tuileTable[1 - workingTable][i][newj + 1]);
-					
+
 					tuileTable[1 - workingTable][i][newj + 1] = getTuile()
 							.init(i, newj + 1, value);
 					tuileTable[1 - workingTable][i][j] = null;
+
+					if (maxChiffre < value) {
+						maxChiffre = value;
+					}
 				} else {
 					merged = false;
 					if (gap > 0) {
-						tuileTable[workingTable][i][j].move(Direction.DOWN, i, newj);
-						
+						tuileTable[workingTable][i][j].move(Direction.DOWN, i,
+								newj);
+
 						tuileTable[1 - workingTable][i][newj] = tuileTable[1 - workingTable][i][j];
 						tuileTable[1 - workingTable][i][j] = null;
 					}
@@ -493,19 +520,25 @@ public class Grille {
 					moved = true;
 					merged = true;
 					deltaScore += (1 << (chiffreTable[1 - workingTable][i][newj - 1] + 1));
-					tuileTable[workingTable][i][j].move(Direction.UP, i, newj - 1);
-					
+					tuileTable[workingTable][i][j].move(Direction.UP, i,
+							newj - 1);
+
 					putInPoubelle(tuileTable[1 - workingTable][i][j]);
 					putInPoubelle(tuileTable[1 - workingTable][i][newj - 1]);
-					
+
 					tuileTable[1 - workingTable][i][newj - 1] = getTuile()
 							.init(i, newj - 1, value);
 					tuileTable[1 - workingTable][i][j] = null;
+
+					if (maxChiffre < value) {
+						maxChiffre = value;
+					}
 				} else {
 					merged = false;
 					if (gap > 0) {
-						tuileTable[workingTable][i][j].move(Direction.UP, i, newj);
-						
+						tuileTable[workingTable][i][j].move(Direction.UP, i,
+								newj);
+
 						tuileTable[1 - workingTable][i][newj] = tuileTable[1 - workingTable][i][j];
 						tuileTable[1 - workingTable][i][j] = null;
 					}

@@ -29,7 +29,7 @@ public class ImageStore {
 	private TextureRegion[] currImages;
 	private BitmapFont font;
 
-	public ImageStore init() {
+	public ImageStore init(BitmapFont font) {
 		chiffreImage = new Texture(Gdx.files.internal("data/chiffres.png"));
 		imgChiffres = new TextureRegion[IMGCHIFFRE_MAX];
 
@@ -58,12 +58,9 @@ public class ImageStore {
 		shuffle(pictures);
 
 		currImages = imgChiffres;
-
-		return this;
-	}
-
-	public ImageStore setFont(BitmapFont font) {
+		
 		this.font = font;
+
 		return this;
 	}
 
@@ -103,7 +100,7 @@ public class ImageStore {
 	public void draw(SpriteBatch batch, int chiffre, int x, int y, int width) {
 		batch.draw(currImages[chiffre], x, y, width, width);
 		if (currImages != imgChiffres) {
-			font.draw(batch, "" + (chiffre), x + 10, y + MiniGame.FONT_SIZE);
+			font.draw(batch, "" + (chiffre + 1), x + 10, y + MiniGame.FONT_SIZE);
 		}
 	}
 }
