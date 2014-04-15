@@ -82,12 +82,11 @@ public class ImageStore {
 	private void shuffle(TextureRegion[] images) {
 
 		for (int i = 0; i < images.length; i++) {
-			int randomPosition = random.nextInt(photos.length);
+			int randomPosition = random.nextInt(images.length);
 			TextureRegion temp = images[i];
 			images[i] = images[randomPosition];
 			images[randomPosition] = temp;
 		}
-
 	}
 
 	public void dispose() {
@@ -101,8 +100,8 @@ public class ImageStore {
 		shuffle(pictures);
 	}
 	
-	public void draw(SpriteBatch batch, int chiffre, int x, int y) {
-		batch.draw(currImages[chiffre], x, y, IMG_WIDTH, IMG_WIDTH);
+	public void draw(SpriteBatch batch, int chiffre, int x, int y, int width) {
+		batch.draw(currImages[chiffre], x, y, width, width);
 		if (currImages != imgChiffres) {
 			font.draw(batch, "" + (chiffre), x + 10, y + MiniGame.FONT_SIZE);
 		}

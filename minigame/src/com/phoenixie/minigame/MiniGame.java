@@ -59,7 +59,7 @@ public class MiniGame extends Game implements GestureListener {
 	static final int BUTTON_HEIGHT = 80;
 	static final int BOTTOM_SPACE = 150;
 	
-	static final int ANIME_SPEED = 10;
+	static final int ANIME_SPEED = 60;
 
 	static final Color COLEUR_BACKGROUND = new Color(0.96875f, 0.9453125f,
 			0.8515625f, 1);
@@ -133,8 +133,8 @@ public class MiniGame extends Game implements GestureListener {
 	private boolean gameLoaded = false;
 	private Settings settings = new Settings();
 
-	private Grille grille = new Grille();
-	private ImageStore imageStore = new ImageStore();
+	private Grille grille;
+	private ImageStore imageStore;
 
 	@Override
 	public void create() {
@@ -213,7 +213,7 @@ public class MiniGame extends Game implements GestureListener {
 					}
 				}));
 
-		loadSettings();
+//		loadSettings();
 		
 //		if (settings.boiteType == BoiteType.CHIFFRES) {
 //			imageStore.setTexture(ImageStore.TextureType.CHIFFRES);
@@ -223,20 +223,26 @@ public class MiniGame extends Game implements GestureListener {
 //			imageStore.setTexture(ImageStore.TextureType.PICTURES);
 //		}
 		
-		grille.create(tableVertex);
+		imageStore = new ImageStore();
+		imageStore.init();
+		
+		grille = new Grille();
+		grille.create(tableVertex, font, imageStore);
 		grille.setTableSize(settings.tableSize);
 		
-		loadGame();
+//		loadGame();
 
 		drawButtons();
 
 		createDialogs();
+		
+		resetGame();
 
-		if (gameLoaded) {
-			resumeGame();
-		} else {
-			resetGame();
-		}
+//		if (gameLoaded) {
+//			resumeGame();
+//		} else {
+//			resetGame();
+//		}
 
 	}
 	
