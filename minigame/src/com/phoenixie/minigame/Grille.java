@@ -549,6 +549,39 @@ public class Grille {
 		return moved;
 	}
 
+	public int point(int x, int y) {
+		int[][] table = chiffreTable[workingTable];
+
+		if (x > tableVertex.x + TABLE_WIDTH || x < tableVertex.x) {
+			return -1;
+		}
+
+		if (y > tableVertex.y + TABLE_WIDTH || y < tableVertex.y) {
+			return -1;
+		}
+
+		int i, j;
+		for (i = tableSize - 1; i >= 0; --i) {
+			if (x > boitesPos[i][0].x) {
+				break;
+			}
+		}
+		if (i < 0) {
+			return -1;
+		}
+
+		for (j = 0; j < tableSize; ++j) {
+			if (y > boitesPos[0][j].y) {
+				break;
+			}
+		}
+		if (j == tableSize) {
+			return -1;
+		}
+
+		return table[i][j];
+	}
+
 	public class Tuile {
 
 		private int chiffre = -1;

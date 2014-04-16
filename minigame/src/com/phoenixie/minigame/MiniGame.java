@@ -28,6 +28,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -59,7 +60,7 @@ public class MiniGame extends Game implements GestureListener {
 	static final int BUTTON_HEIGHT = 80;
 	static final int BOTTOM_SPACE = 150;
 
-	static final int ANIME_SPEED = 50;
+	static final int ANIME_SPEED = 60;
 
 	static final Color COLEUR_BACKGROUND = new Color(0.96875f, 0.9453125f,
 			0.8515625f, 1);
@@ -87,15 +88,20 @@ public class MiniGame extends Game implements GestureListener {
 	private CheckBox checkTable44;
 	private CheckBox checkTable55;
 	private CheckBox checkTable66;
+	private CheckBox checkSound;
+	private CheckBox checkMusic;
+	private CheckBox checkImage;
+	
 	private Dialog dialogSettings;
 	private Dialog dialogReset;
+	private ImageDialog dialogShowImage;
 	private Dialog dialog2048;
 	private Dialog dialog4096;
 	private Dialog dialog8192;
 	private Dialog dialog16384;
 	private Dialog dialog32768;
 	private Dialog dialog65536;
-	
+
 	private Sound soundStart;
 	private Sound soundSwipe;
 	private Sound soundError;
@@ -103,7 +109,7 @@ public class MiniGame extends Game implements GestureListener {
 	private Sound soundLevelup;
 	private Sound soundFelicitation;
 	private Music musicBackground;
-	
+
 	enum Direction {
 		HOLD, UP, DOWN, LEFT, RIGHT
 	}
@@ -147,6 +153,9 @@ public class MiniGame extends Game implements GestureListener {
 	private static class Settings {
 		public BoiteType boiteType = BoiteType.CHIFFRES;;
 		public int tableSize = 4;
+		public boolean enableSound = true;
+		public boolean enableMusic = true;
+		public boolean enableImage = true;
 	};
 
 	private Pos tableVertex;
@@ -161,13 +170,39 @@ public class MiniGame extends Game implements GestureListener {
 	private int[][][] gameEtapeBuffer;
 	private int[][] currChiffreTable;
 	private int maxChiffre = 0;
-	
+
 	private GameState gameState = new GameState();
 	private boolean gameLoaded = false;
 	private Settings settings = new Settings();
 
 	private Grille grille;
 	private ImageStore imageStore;
+	
+	private class ImageDialog extends Dialog {
+		private Image image;
+		private TextureRegionDrawable drawble;
+		private TextureRegion region;
+
+		public ImageDialog(String title, Skin skin, String windowStyleName) {
+			super(title, skin, windowStyleName);
+			
+			image = new Image();
+			drawble = new TextureRegionDrawable();
+			region = new TextureRegion();
+		}
+		
+		public void show(Stage stage, Texture t) {
+			region.setTexture(t);
+			region.setRegion(0, 0, t.getWidth(), t.getHeight());
+			drawble.setRegion(region);
+			image.setDrawable(drawble);
+			
+			getContentTable().clear();
+			getContentTable().add(image).width(640).height(640);
+			
+			this.show(stage);
+		}
+	}
 
 	@Override
 	public void create() {
@@ -202,7 +237,7 @@ public class MiniGame extends Game implements GestureListener {
 		tableRightTop.y = tableVertex.y + Grille.TABLE_WIDTH;
 
 		Gdx.input.setInputProcessor(new InputMultiplexer(stage,
-				new GestureDetector(0.0f, 0.0f, 0.0f, 5f, this) {
+				new GestureDetector(20, 0.4f, 0.0f, 5f, this) {
 					private boolean wrongStart = false;
 
 					@Override
@@ -257,19 +292,26 @@ public class MiniGame extends Game implements GestureListener {
 			imageStore.setTexture(ImageStore.TextureType.PHOTOS);
 		} else if (settings.boiteType == BoiteType.PICTURES) {
 			imageStore.setTexture(ImageStore.TextureType.PICTURES);
-		}		
-		
+		}
+
 		grille = new Grille();
 		grille.create(this, tableVertex, font, imageStore);
 		grille.setTableSize(settings.tableSize);
-		
-		soundStart = Gdx.audio.newSound(Gdx.files.internal("data/sound/start.wav"));
-		soundSwipe = Gdx.audio.newSound(Gdx.files.internal("data/sound/swipe.wav"));
-		soundError = Gdx.audio.newSound(Gdx.files.internal("data/sound/error.wav"));
-		soundScore = Gdx.audio.newSound(Gdx.files.internal("data/sound/score.wav"));
-		soundLevelup = Gdx.audio.newSound(Gdx.files.internal("data/sound/levelup.wav"));
-		soundFelicitation = Gdx.audio.newSound(Gdx.files.internal("data/sound/felicitation.mp3"));
-		musicBackground = Gdx.audio.newMusic(Gdx.files.internal("data/sound/bg.ogg"));
+
+		soundStart = Gdx.audio.newSound(Gdx.files
+				.internal("data/sound/start.wav"));
+		soundSwipe = Gdx.audio.newSound(Gdx.files
+				.internal("data/sound/swipe.wav"));
+		soundError = Gdx.audio.newSound(Gdx.files
+				.internal("data/sound/error.wav"));
+		soundScore = Gdx.audio.newSound(Gdx.files
+				.internal("data/sound/score.wav"));
+		soundLevelup = Gdx.audio.newSound(Gdx.files
+				.internal("data/sound/levelup.wav"));
+		soundFelicitation = Gdx.audio.newSound(Gdx.files
+				.internal("data/sound/felicitation.mp3"));
+		musicBackground = Gdx.audio.newMusic(Gdx.files
+				.internal("data/sound/bg.ogg"));
 
 		loadGame();
 
@@ -282,9 +324,11 @@ public class MiniGame extends Game implements GestureListener {
 		} else {
 			resetGame();
 		}
-		
-		musicBackground.play();
-		musicBackground.setLooping(true);
+
+		if (settings.enableMusic) {
+			musicBackground.play();
+			musicBackground.setLooping(true);
+		}
 	}
 
 	private void saveSettings() {
@@ -375,11 +419,12 @@ public class MiniGame extends Game implements GestureListener {
 			FileHandle file = Gdx.files.local("gamedata");
 			InputStream istream = file.read();
 			Input input = new Input(istream);
-			
+
 			kryo.setDefaultSerializer(FieldSerializer.class);
-			GameState_0D125 state = kryo.readObject(input, GameState_0D125.class);
+			GameState_0D125 state = kryo.readObject(input,
+					GameState_0D125.class);
 			input.close();
-			
+
 			gameState.tableSize = state.boiteHorzCount;
 			gameState.gameCount = state.gameCount;
 			gameState.gameScore = state.gameScore;
@@ -410,7 +455,7 @@ public class MiniGame extends Game implements GestureListener {
 			FileHandle file = Gdx.files.local("gamedata.0.126");
 			InputStream istream = file.read();
 			Input input = new Input(istream);
-			
+
 			kryo.setDefaultSerializer(CompatibleFieldSerializer.class);
 			gameState = kryo.readObject(input, GameState.class);
 			input.close();
@@ -427,7 +472,7 @@ public class MiniGame extends Game implements GestureListener {
 
 		return true;
 	}
-	
+
 	private void resumeGame() {
 		if (grille.getTableSize() != gameState.tableSize) {
 			grille.setTableSize(gameState.tableSize);
@@ -439,7 +484,7 @@ public class MiniGame extends Game implements GestureListener {
 		gameScore = gameState.gameScore;
 		gameTime = gameState.gameTime;
 		currChiffreTable = gameState.chiffreTable;
-		
+
 		grille.setChiffreTable(currChiffreTable);
 
 		for (int i = 0; i < gameState.tableSize; ++i) {
@@ -476,8 +521,10 @@ public class MiniGame extends Game implements GestureListener {
 		buttonReset.setVisible(false);
 
 		grille.restart();
-		
-		soundStart.play();
+
+		if (settings.enableSound) {
+			soundStart.play();
+		}
 	}
 
 	private void drawStat() {
@@ -613,6 +660,14 @@ public class MiniGame extends Game implements GestureListener {
 		tableSize.setMinCheckCount(1);
 		tableSize.setUncheckLast(true);
 
+		checkSound = new CheckBox("Sons", skin);
+		checkMusic = new CheckBox("Musique", skin);
+		checkImage = new CheckBox("Agrandir les images", skin);
+		
+		checkSound.getCells().get(0).size(30, 30);
+		checkMusic.getCells().get(0).size(30, 30);
+		checkImage.getCells().get(0).size(30, 30);
+
 		Dialog.fadeDuration = 0.2f;
 		dialogSettings = new Dialog("Paramètres", skin, "dialog") {
 			protected void result(Object object) {
@@ -645,22 +700,39 @@ public class MiniGame extends Game implements GestureListener {
 					buttonReset.setVisible(true);
 				}
 
+				settings.enableSound = checkSound.isChecked();
+				settings.enableMusic = checkMusic.isChecked();
+				settings.enableImage = checkImage.isChecked();
+
+				if (settings.enableMusic && !musicBackground.isPlaying()) {
+					musicBackground.play();
+					musicBackground.setLooping(true);
+				}
+				if (!settings.enableMusic) {
+					musicBackground.stop();
+				}
+				
 				saveSettings();
 			}
 		};
 
 		dialogSettings.center();
-		dialogSettings.padTop(100).padBottom(30);
+		dialogSettings.padTop(100).padBottom(40);
 
 		Table table = dialogSettings.getContentTable();
-		table.defaults().width(250);
-		table.add(checkChiffres);
-		table.add(checkPhotos);
-		table.add(checkPictures);
+		table.defaults().width(250).height(75);
+		table.add(checkChiffres).colspan(2);
+		table.add(checkPhotos).colspan(2);
+		table.add(checkPictures).colspan(2);
 		table.row().padTop(20);
-		table.add(checkTable44);
-		table.add(checkTable55);
-		table.add(checkTable66);
+		table.add(checkImage).colspan(6);
+		table.row().padTop(20);
+		table.add(checkTable44).colspan(2);
+		table.add(checkTable55).colspan(2);
+		table.add(checkTable66).colspan(2);
+		table.row().padTop(20);;
+		table.add(checkSound).colspan(3);
+		table.add(checkMusic).colspan(3);
 		table.row();
 
 		table = dialogSettings.getButtonTable();
@@ -690,6 +762,14 @@ public class MiniGame extends Game implements GestureListener {
 		}.text("Êtes-vous sûr de relancer le jeu?").button("Oui!", true)
 				.button("Non!", false).key(Keys.ENTER, true)
 				.key(Keys.ESCAPE, false);
+		
+		dialogShowImage = new ImageDialog("", skin, "dialog");
+		dialogShowImage.padBottom(30);
+		table = dialogShowImage.getButtonTable();
+		table.padTop(30);
+		dbutton = new TextButton("OK", skin);
+		table.add(dbutton).width(200f);
+		dialogShowImage.setObject(dbutton, true);
 
 		dialog2048 = new Dialog("2048!", skin, "dialog").text(
 				"Très bien! Continuez!").button("OK", true);
@@ -731,6 +811,10 @@ public class MiniGame extends Game implements GestureListener {
 			checkTable66.setChecked(true);
 			break;
 		}
+
+		checkImage.setChecked(settings.enableImage);
+		checkMusic.setChecked(settings.enableMusic);
+		checkSound.setChecked(settings.enableSound);
 
 		dialogSettings.show(stage);
 	}
@@ -809,11 +893,14 @@ public class MiniGame extends Game implements GestureListener {
 
 	private void felicitation(int cur) {
 		if (cur > maxChiffre) {
-			if (cur < 10) {
-				soundLevelup.play();
-			} else {
-				soundFelicitation.play();
+			if (settings.enableSound) {
+				if (cur < 10) {
+					soundLevelup.play();
+				} else {
+					soundFelicitation.play();
+				}
 			}
+
 			switch (cur) {
 			case 10:
 				dialog2048.show(stage);
@@ -840,19 +927,24 @@ public class MiniGame extends Game implements GestureListener {
 
 	private void move(Direction direction) {
 		if (grille.move(direction)) {
-			soundSwipe.play();
+			if (settings.enableSound) {
+				soundSwipe.play();
+			}
 		} else {
-			soundError.play(0.3f);
+			if (settings.enableSound) {
+				soundError.play(0.3f);
+			}
 		}
 	}
 
-	void onMoved(int maxChiffre, int score, int[][] oldChiffreTable, int[][] newChiffreTable) {
+	void onMoved(int maxChiffre, int score, int[][] oldChiffreTable,
+			int[][] newChiffreTable) {
 		gameScore += score;
 		++gameCount;
-		
-//		if (score > 0) {
-//			soundScore.play();
-//		}
+
+		// if (score > 0) {
+		// soundScore.play();
+		// }
 
 		buttonUndo.setVisible(true);
 		buttonReset.setVisible(true);
@@ -864,9 +956,9 @@ public class MiniGame extends Game implements GestureListener {
 
 		etapeQueue.enqueue(bak);
 		currChiffreTable = newChiffreTable;
-		
+
 		saveGame();
-		
+
 		felicitation(maxChiffre);
 	}
 
@@ -877,8 +969,21 @@ public class MiniGame extends Game implements GestureListener {
 
 	@Override
 	public boolean tap(float x, float y, int count, int button) {
-		System.out.println("AA: " + x + ", " + y + ", " + count);
-		return false;
+		if (!settings.enableImage) {
+			return false;
+		}
+		
+		Vector3 tapPos = new Vector3(x, y, 0);
+		camera.unproject(tapPos);
+		
+		int v = grille.point((int)tapPos.x, (int)tapPos.y);
+		if (v < 0) {
+			return false;
+		}
+		
+		Texture t = imageStore.getTexture(v);
+		dialogShowImage.show(stage, t);
+		return true;
 	}
 
 	@Override
